@@ -108,7 +108,7 @@ if __name__ == "__main__":
             predictions, visualized_output = demo.run_on_image(img)
             
             #extract from the preds the data and save them to a csv (added by alex)
-            instances = predictions["instances"].to(torch.device("cpu"))
+            predictions = predictions["instances"].to(torch.device("cpu"))
             boxes = predictions.pred_boxes if predictions.has("pred_boxes") else None
             scores = predictions.scores if predictions.has("scores") else None
             classes = predictions.pred_classes.tolist() if predictions.has("pred_classes") else None

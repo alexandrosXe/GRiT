@@ -5,6 +5,8 @@ import time
 import cv2
 import tqdm
 import sys
+import pandas as pd #added by alex
+import torch
 
 from detectron2.config import get_cfg
 from detectron2.data.detection_utils import read_image
@@ -92,12 +94,31 @@ if __name__ == "__main__":
     cfg = setup_cfg(args)
 
     demo = VisualizationDemo(cfg)
-
+    #added by Alex
+    boxes_list = []
+    scores_list = []
+    classes_list = []
+    object_description_list = []
+    image_paths = []
+    
     if args.input:
         for path in tqdm.tqdm(os.listdir(args.input[0]), disable=not args.output):
             img = read_image(os.path.join(args.input[0], path), format="BGR")
             start_time = time.time()
             predictions, visualized_output = demo.run_on_image(img)
+            
+            #extract from the preds the data and save them to a csv (added by alex)
+            instances = predictions["instances"].to(torch.device("cpu"))
+            boxes = predictions.pred_boxes if predictions.has("pred_boxes") else None
+            scores = predictions.scores if predictions.has("scores") else None
+            classes = predictions.pred_classes.tolist() if predictions.has("pred_classes") else None
+            object_description = predictions.pred_object_descriptions.data
+            
+            boxes_list.append(boxes)
+            scores_list.append(scores)
+            classes_list.append(classes)
+            object_description_list.append(object_description)
+            
             logger.info(
                 "{}: {} in {:.2f}s".format(
                     path,
@@ -118,8 +139,11 @@ if __name__ == "__main__":
                     assert len(args.input) == 1, "Please specify a directory with args.output"
                     out_filename = args.output
                 visualized_output.save(out_filename)
+                image_paths.append(out_filename) #added by alex
             else:
                 cv2.namedWindow(WINDOW_NAME, cv2.WINDOW_NORMAL)
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
+    csv_to_save = pd.DataFrame({'image_id' : image_paths, 'boxes' : boxes_list, 'scores' : scores_list, 'classes' : classes_list, 'object_description' : object_description_list})
+    csv_to_save.to_csv("grit_results.csv", index = False)

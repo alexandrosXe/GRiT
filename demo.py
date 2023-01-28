@@ -146,5 +146,5 @@ if __name__ == "__main__":
                 cv2.imshow(WINDOW_NAME, visualized_output.get_image()[:, :, ::-1])
                 if cv2.waitKey(0) == 27:
                     break  # esc to quit
-    csv_to_save = pd.DataFrame({'image_id' : image_paths, 'boxes' : boxes_list, 'scores' : scores_list, 'classes' : classes_list, 'object_description' : object_description_list})
+    csv_to_save = pd.DataFrame({'original_image_id' : image_paths, 'boxes' : boxes_list, 'scores' : scores_list, 'classes' : classes_list, 'object_description' : object_description_list})
     csv_to_save.to_csv("grit_results.csv", index = False)

@@ -109,7 +109,7 @@ if __name__ == "__main__":
             
             #extract from the preds the data and save them to a csv (added by alex)
             instances = predictions["instances"].to(torch.device("cpu"))
-            boxes = instances.pred_boxes.tensor.tolist()[0] if instances.has("pred_boxes") else None
+            boxes = instances.pred_boxes.tensor.tolist() if instances.has("pred_boxes") else None
             scores = instances.scores.data.tolist() if instances.has("scores") else None
             classes = instances.pred_classes.tolist() if instances.has("pred_classes") else None
             object_description = instances.pred_object_descriptions.data
